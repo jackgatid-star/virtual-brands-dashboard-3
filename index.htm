@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0b1120">
+<title>Virtual Brands — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0b1120;--bg2:#0f172a;--bg3:#1e293b;--card:#111b2e;--card2:#172033;--border:rgba(148,163,184,0.08);--border2:rgba(148,163,184,0.14);--text:#e8edf5;--text2:#94a3b8;--text3:#536380;--blue1:#60a5fa;--blue2:#3b82f6;--blue3:#2563eb;--blue4:#1d4ed8;--blue5:#1e40af;--ice:#bfdbfe;--steel:#93c5fd;--navy:#0f2557;--up:#34d399;--down:#f87171;--warn:#fbbf24;--accent:#60a5fa;--font-display:'Outfit',sans-serif;--font-mono:'JetBrains Mono',monospace;--safe-bottom:env(safe-area-inset-bottom,0px);--nav-h:62px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font-display);height:100%;overflow:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 20% 0%,rgba(37,99,235,0.08) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 80% 100%,rgba(96,165,250,0.04) 0%,transparent 50%);pointer-events:none;z-index:0}
+.app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column}
+.name-overlay{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;animation:fadeIn 0.5s ease}.name-overlay.hidden{display:none}
+.name-overlay .logo-big{width:64px;height:64px;background:linear-gradient(135deg,var(--blue2),var(--blue4));border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:24px;box-shadow:0 8px 32px rgba(37,99,235,0.3)}
+.name-overlay h1{font-size:24px;font-weight:700;letter-spacing:-0.5px;margin-bottom:6px}
+.name-overlay p{font-size:13px;color:var(--text3);margin-bottom:32px}
+.name-input{width:100%;max-width:280px;padding:14px 18px;background:var(--card);border:1.5px solid var(--border2);border-radius:12px;color:var(--text);font-family:var(--font-display);font-size:16px;font-weight:500;outline:none;text-align:center;transition:border-color 0.2s}.name-input:focus{border-color:var(--blue2)}.name-input::placeholder{color:var(--text3)}
+.name-btn{margin-top:16px;padding:12px 40px;background:linear-gradient(135deg,var(--blue3),var(--blue4));border:none;border-radius:10px;color:#fff;font-family:var(--font-display);font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(37,99,235,0.3)}.name-btn:active{transform:scale(0.97)}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;padding-top:max(10px,env(safe-area-inset-top,10px));background:rgba(11,17,32,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);flex-shrink:0;z-index:10}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:30px;height:30px;background:linear-gradient(135deg,var(--blue2),var(--blue4));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 8px rgba(37,99,235,0.25)}
+.logo-text{font-size:15px;font-weight:700;letter-spacing:-0.3px}
+.top-right{display:flex;align-items:center;gap:8px}
+.live-dot{width:6px;height:6px;background:var(--up);border-radius:50%;animation:pulse 2s infinite}
+.top-date{font-family:var(--font-mono);font-size:10px;color:var(--text3)}
+.main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--nav-h) + var(--safe-bottom) + 16px);scroll-behavior:smooth;scrollbar-width:none}.main::-webkit-scrollbar{display:none}
+.page{display:none}.page.active{display:block}
+.hero{margin:12px;padding:20px;background:linear-gradient(145deg,var(--navy) 0%,var(--card2) 100%);border:1px solid rgba(96,165,250,0.1);border-radius:16px;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;top:-30%;right:-20%;width:200px;height:200px;background:radial-gradient(circle,rgba(59,130,246,0.12) 0%,transparent 70%);pointer-events:none}
+.hero-greeting{font-size:22px;font-weight:700;letter-spacing:-0.5px}.hero-greeting span{color:var(--blue1)}
+.hero-sub{font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--font-mono);font-weight:400}
+.hero-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.hero-stat{background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.hero-stat-val{font-size:18px;font-weight:700;letter-spacing:-0.5px}.hero-stat-lbl{font-size:9px;color:var(--text3);font-family:var(--font-mono);letter-spacing:0.8px;text-transform:uppercase;margin-top:2px}
+.day-compare{margin:0 12px 12px;padding:18px 16px;background:var(--card);border:1px solid var(--border);border-radius:14px}
+.day-compare-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.day-compare-title{font-size:13px;font-weight:600;color:var(--text2)}
+.day-compare-badge{font-family:var(--font-mono);font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(96,165,250,0.1);color:var(--blue1);font-weight:500}
+.compare-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}.compare-row:last-child{border-bottom:none}
+.compare-label{font-size:12px;color:var(--text3);min-width:70px}.compare-vals{display:flex;align-items:center;gap:12px}
+.compare-today{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--text);min-width:65px;text-align:right}
+.compare-prev{font-family:var(--font-mono);font-size:11px;color:var(--text3);min-width:55px;text-align:right}
+.compare-delta{font-family:var(--font-mono);font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;min-width:48px;text-align:center}
+.compare-delta.up{background:rgba(52,211,153,0.1);color:var(--up)}.compare-delta.down{background:rgba(248,113,113,0.1);color:var(--down)}
+.kpi-scroll{display:flex;gap:10px;padding:0 12px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}.kpi-scroll::-webkit-scrollbar{display:none}
+.kpi{min-width:132px;max-width:150px;flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--blue2);border-radius:12px 12px 0 0;opacity:0.6}
+.kpi-label{font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:7px;font-family:var(--font-mono)}
+.kpi-val{font-size:19px;font-weight:700;line-height:1;margin-bottom:3px;letter-spacing:-0.5px;color:var(--blue1)}.kpi-val.accent{color:var(--steel)}.kpi-val.warn{color:var(--warn)}.kpi-val.neg{color:var(--down)}
+.kpi-sub{font-size:9px;color:var(--text3);font-family:var(--font-mono)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 16px;margin:0 12px 12px}
+.card-title{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card-title .icon{font-size:13px;margin-right:5px}
+.card-badge{font-family:var(--font-mono);font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(96,165,250,0.08);color:var(--text3)}
+.chart-wrap{position:relative}.chart-wrap canvas{display:block;width:100%!important}
+.section-hdr{font-size:17px;font-weight:700;letter-spacing:-0.4px;padding:16px 16px 10px}.section-hdr span{color:var(--text3);font-weight:400;font-size:12px;margin-left:6px}
+.brand-table{width:100%;border-collapse:collapse}
+.brand-table th{font-family:var(--font-mono);font-size:9px;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);padding:0 0 10px;text-align:right;font-weight:400;border-bottom:1px solid var(--border)}.brand-table th:first-child{text-align:left}
+.brand-table td{padding:9px 0;border-bottom:1px solid var(--border);font-size:12px;text-align:right}.brand-table td:first-child{text-align:left}.brand-table tr:last-child td{border-bottom:none}
+.brand-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:middle}.brand-name{font-weight:500;font-size:12px}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}.table-scroll::-webkit-scrollbar{display:none}.table-scroll table{min-width:580px}
+.stars{display:flex;gap:1px}.star{font-size:10px}.star.on{color:var(--warn)}.star.off{color:var(--text3)}
+.filter-bar{display:flex;gap:6px;padding:0 12px 12px;overflow-x:auto;scrollbar-width:none}.filter-bar::-webkit-scrollbar{display:none}
+.chip{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--text3);font-family:var(--font-display);white-space:nowrap;flex-shrink:0}.chip.active{background:var(--blue4);border-color:var(--blue3);color:#fff}
+.donut-legend{display:flex;flex-direction:column;gap:7px;margin-top:14px}.legend-item{display:flex;align-items:center;gap:8px;font-size:11px}.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}.legend-name{flex:1;color:var(--text2)}.legend-val{font-family:var(--font-mono);color:var(--text);font-size:11px}.legend-pct{font-family:var(--font-mono);color:var(--text3);font-size:10px}
+.mini-stat{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--border)}.mini-stat:last-child{border-bottom:none}.mini-stat-label{font-size:11px;color:var(--text2)}.mini-stat-val{font-family:var(--font-mono);font-size:12px;font-weight:500}
+.pnl-row{display:flex;align-items:center;gap:10px;padding:7px 0}.pnl-label{min-width:100px;font-size:11px;color:var(--text2)}.pnl-bar-wrap{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}.pnl-bar{height:100%;border-radius:3px}.pnl-val{min-width:65px;text-align:right;font-family:var(--font-mono);font-size:11px}
+.ebitda-positive{color:var(--up)}.ebitda-negative{color:var(--down)}
+.brand-kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 12px 12px}.brand-kpi-grid .kpi{min-width:unset;max-width:unset}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-around;height:calc(var(--nav-h) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:rgba(11,17,32,0.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--border)}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 14px;cursor:pointer;border:none;background:none;position:relative}
+.nav-item .ni{font-size:19px;line-height:1;transition:transform 0.2s}.nav-item .nl{font-size:9px;font-family:var(--font-mono);letter-spacing:0.5px;color:var(--text3);transition:color 0.2s}
+.nav-item.active .nl{color:var(--blue1)}.nav-item.active .ni{transform:scale(1.1)}.nav-item.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:20px;height:2px;background:var(--blue2);border-radius:0 0 2px 2px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.35}}
+@media(min-width:768px){.app{max-width:480px;margin:0 auto}.bottom-nav{max-width:480px;left:50%;transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="name-overlay" id="nameOverlay"><div class="logo-big">&#127815;</div><h1>Virtual Brands</h1><p>Operations Dashboard</p><input type="text" class="name-input" id="nameInput" placeholder="Type your name" maxlength="20" autocomplete="off"><button class="name-btn" onclick="saveName()">Continue</button></div>
+<div class="top-bar"><div class="logo"><div class="logo-mark">&#127815;</div><div class="logo-text">Virtual Brands</div></div><div class="top-right"><span class="live-dot"></span><span class="top-date" id="navDate">&mdash;</span></div></div>
+<div class="main">
+<div class="page active" id="page-overview">
+<div class="hero"><div class="hero-greeting">Good <span id="timeOfDay">evening</span>, <span id="userName">&mdash;</span>.</div><div class="hero-sub" id="heroSub">Loading...</div><div class="hero-stats"><div class="hero-stat"><div class="hero-stat-val" id="heroOrders" style="color:var(--steel)">&mdash;</div><div class="hero-stat-lbl">Orders Today</div></div><div class="hero-stat"><div class="hero-stat-val" id="heroSales" style="color:var(--blue1)">&mdash;</div><div class="hero-stat-lbl">Sales Today</div></div><div class="hero-stat"><div class="hero-stat-val" id="heroEbitdaDay" style="color:var(--ice)">&mdash;</div><div class="hero-stat-lbl">EBITDA Today</div></div><div class="hero-stat"><div class="hero-stat-val" id="heroEbitdaMtd" style="color:var(--steel)">&mdash;</div><div class="hero-stat-lbl">EBITDA MTD</div></div></div></div>
+<div class="day-compare"><div class="day-compare-header"><span class="day-compare-title">&#128202; Today vs Last <span id="compareDayName">&mdash;</span></span><span class="day-compare-badge" id="compareDates">&mdash;</span></div><div id="compareRows"></div></div>
+<div class="kpi-scroll"><div class="kpi"><div class="kpi-label">Sales</div><div class="kpi-val" id="k1">&mdash;</div><div class="kpi-sub">Gross</div></div><div class="kpi"><div class="kpi-label">Orders</div><div class="kpi-val accent" id="k2">&mdash;</div><div class="kpi-sub">Today</div></div><div class="kpi"><div class="kpi-label">Payouts</div><div class="kpi-val" id="k3">&mdash;</div><div class="kpi-sub">Net</div></div><div class="kpi"><div class="kpi-label">EBITDA MTD</div><div class="kpi-val" id="k4">&mdash;</div><div class="kpi-sub" id="k4sub">Month</div></div><div class="kpi"><div class="kpi-label">Mkt+Fees</div><div class="kpi-val warn" id="k5">&mdash;</div><div class="kpi-sub">Ads</div></div><div class="kpi"><div class="kpi-label">EBITDA YTD</div><div class="kpi-val" id="k6">&mdash;</div><div class="kpi-sub">Year</div></div></div>
+<div class="card"><div class="card-title"><span><span class="icon">&#128200;</span>Sales & EBITDA 30d</span><span class="card-badge">DAILY</span></div><div class="chart-wrap"><canvas id="chartSalesEbitda" height="200"></canvas></div></div>
+<div class="card"><div class="card-title"><span>&#127829; Brand Mix Today</span></div><div class="chart-wrap" style="max-width:200px;margin:0 auto"><canvas id="chartBrandDonut" height="200"></canvas></div><div class="donut-legend" id="donutLegend"></div></div>
+<div class="card"><div class="card-title"><span>&#127978; Brand Earnings</span></div><div class="table-scroll"><table class="brand-table" id="brandTableDay"></table></div></div>
+<div class="card"><div class="card-title"><span>&#11088; Ratings</span><span class="card-badge" id="avgRatingBadge">&mdash;</span></div><div id="ratingsBlock"></div></div>
+</div>
+<div class="page" id="page-brands"><div class="section-hdr">Brands <span>YTD 2026</span></div><div class="brand-kpi-grid" id="brandKpiRow"></div><div class="card"><div class="card-title"><span>&#128176; Earnings</span></div><div class="chart-wrap"><canvas id="chartBrandEarnings" height="240"></canvas></div></div><div class="card"><div class="card-title"><span>&#128230; Orders</span></div><div class="chart-wrap"><canvas id="chartBrandOrders" height="240"></canvas></div></div><div class="card"><div class="card-title"><span>&#128200; Payout Trend</span></div><div class="chart-wrap"><canvas id="chartBrandPayout" height="180"></canvas></div></div><div class="card"><div class="card-title"><span>&#127942; Scorecard</span><span class="card-badge">YTD</span></div><div class="table-scroll"><table class="brand-table" id="brandScorecard"></table></div></div></div>
+<div class="page" id="page-history"><div class="section-hdr">History <span>67 days</span></div><div class="filter-bar"><button class="chip active" onclick="setFilter('all',this)">All</button><button class="chip" onclick="setFilter('jan',this)">Jan</button><button class="chip" onclick="setFilter('feb',this)">Feb</button><button class="chip" onclick="setFilter('mar',this)">Mar</button><button class="chip" onclick="setFilter('top10',this)">Top 10</button></div><div class="card"><div class="card-title"><span>&#128200; Orders Timeline</span></div><div class="chart-wrap"><canvas id="chartAllOrders" height="180"></canvas></div></div><div class="card"><div class="card-title"><span>&#128203; Day-by-Day</span></div><div class="table-scroll" style="max-height:400px;overflow-y:auto"><table class="brand-table" style="width:100%"><thead><tr><th style="text-align:left">Date</th><th>Day</th><th>Ord</th><th>Sales</th><th>Fees</th><th>Pay</th><th>OpEx</th><th>EBITDA</th><th>MTD</th></tr></thead><tbody id="historyTable"></tbody></table></div></div></div>
+<div class="page" id="page-financials"><div class="section-hdr">Financials <span>P&L 2026</span></div><div class="brand-kpi-grid"><div class="kpi"><div class="kpi-label">Sales YTD</div><div class="kpi-val" id="f1">&mdash;</div><div class="kpi-sub">Gross</div></div><div class="kpi"><div class="kpi-label">Mkt+Fees</div><div class="kpi-val warn" id="f2">&mdash;</div><div class="kpi-sub">Fees</div></div><div class="kpi"><div class="kpi-label">Payouts</div><div class="kpi-val accent" id="f3">&mdash;</div><div class="kpi-sub">Net</div></div><div class="kpi"><div class="kpi-label">EBITDA YTD</div><div class="kpi-val" id="f4">&mdash;</div><div class="kpi-sub">After OpEx</div></div></div><div class="card"><div class="card-title"><span>&#128202; Monthly P&L</span></div><div class="chart-wrap"><canvas id="chartMonthlyPnl" height="240"></canvas></div></div><div class="card"><div class="card-title"><span>&#128184; Cost Breakdown</span></div><div class="chart-wrap" style="max-width:200px;margin:0 auto"><canvas id="chartCostBreakdown" height="200"></canvas></div><div class="donut-legend" id="costLegend"></div></div><div class="card"><div class="card-title"><span>&#128201; EBITDA Trend</span></div><div class="chart-wrap"><canvas id="chartEbitdaTrend" height="200"></canvas></div></div><div class="card"><div class="card-title"><span>&#129534; OpEx Breakdown</span></div><div id="opexBlock"></div></div></div>
+</div>
+<nav class="bottom-nav"><button class="nav-item active" onclick="showPage('overview',this)"><span class="ni">&#128202;</span><span class="nl">Today</span></button><button class="nav-item" onclick="showPage('brands',this)"><span class="ni">&#127828;</span><span class="nl">Brands</span></button><button class="nav-item" onclick="showPage('history',this)"><span class="ni">&#128197;</span><span class="nl">History</span></button><button class="nav-item" onclick="showPage('financials',this)"><span class="ni">&#128176;</span><span class="nl">Finance</span></button></nav>
+</div>
+<script>
+let RAW = [];
+const SHEET_ID = '1-a3i359_nkYF7QpaaNBnnQHQaXd1pCfX09k5sgvIt6I'; // <-- PASTE YOUR SHEET ID HERE
+const SHEET_NAME = 'DailyData';
+const SHEET_GID = '1083064469';
+const SHEETS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
+
+async function loadFromSheets() {
+  try {
+    document.getElementById('heroSub').textContent = 'Loading data from Google Sheets...';
+    const cacheBust = '&_=' + Date.now();
+    
+    // Try multiple endpoints in order of reliability
+    const urls = [
+      'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv&gid=' + SHEET_GID + cacheBust,
+      'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/export?format=csv&gid=' + SHEET_GID + cacheBust,
+      'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWi5CI3XkbHjM5HE9zLRPvvb9kTCm-e_PEporPYc_pmBFBj8Q1zkYS-LkF-5f7nBZt4hfOi1UaqQrO/pub?gid=' + SHEET_GID + '&single=true&output=csv' + cacheBust
+    ];
+    
+    let text = '';
+    for (const url of urls) {
+      try {
+        console.log('Trying:', url.substring(0, 80) + '...');
+        const res = await fetch(url);
+        if (!res.ok) continue;
+        text = await res.text();
+        if (text && text.includes('date') && text.includes('total_orders')) {
+          console.log('Success with URL:', url.substring(0, 80));
+          break;
+        }
+        text = '';
+      } catch(e) { console.log('Failed:', e.message); continue; }
+    }
+    
+    if (!text) {
+      // Last resort: try gviz JSON
+      try {
+        const jUrl = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&gid=' + SHEET_GID + cacheBust;
+        const res = await fetch(jUrl);
+        const jsonText = await res.text();
+        const json = JSON.parse(jsonText.substring(jsonText.indexOf('{'), jsonText.lastIndexOf('}') + 1));
+        const cols = json.table.cols.map(c => c.label);
+        json.table.rows.forEach(row => {
+          const obj = {};
+          row.c.forEach((cell, idx) => {
+            if (idx < cols.length && cols[idx]) {
+              let val = cell ? (cell.v !== null ? cell.v : 0) : 0;
+              if (cols[idx] === 'date' && typeof val === 'string' && val.startsWith('Date(')) {
+                const parts = val.match(/Date\((\d+),(\d+),(\d+)\)/);
+                if (parts) val = parts[1]+'-'+String(parseInt(parts[2])+1).padStart(2,'0')+'-'+String(parseInt(parts[3])).padStart(2,'0');
+              }
+              obj[cols[idx]] = val;
+            }
+          });
+          if (obj.date && obj.total_orders > 0) RAW.push(obj);
+        });
+        console.log('Loaded via JSON:', RAW.length, 'rows');
+        return RAW.length > 0;
+      } catch(e) {
+        console.error('JSON fallback also failed:', e);
+      }
+    }
+    
+    if (!text) {
+      document.getElementById('heroSub').textContent = 'Error: Could not connect to Google Sheets. Make sure it is Published to Web.';
+      return false;
+    }
+    
+    // Parse CSV
+    const lines = text.trim().split('\n');
+    const headers = lines[0].split(',').map(h => h.replace(/"/g,'').trim());
+    console.log('Headers:', headers.slice(0,5).join(', '));
+    
+    RAW = [];
+    for (let i = 1; i < lines.length; i++) {
+      // Handle CSV with possible quoted fields
+      const vals = [];
+      let current = '';
+      let inQuotes = false;
+      for (let ch of lines[i]) {
+        if (ch === '"') { inQuotes = !inQuotes; continue; }
+        if (ch === ',' && !inQuotes) { vals.push(current.trim()); current = ''; continue; }
+        current += ch;
+      }
+      vals.push(current.trim());
+      
+      if (vals.length < 5) continue;
+      const obj = {};
+      headers.forEach((h, idx) => {
+        if (!h) return;
+        let v = vals[idx] || '';
+        if (h === 'date') {
+          // Handle various date formats
+          if (v.match(/^\d{4}-\d{2}-\d{2}/)) obj[h] = v.substring(0,10);
+          else if (v.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)) {
+            const p = v.split('/');
+            obj[h] = p[2]+'-'+p[0].padStart(2,'0')+'-'+p[1].padStart(2,'0');
+          } else obj[h] = v;
+        } else {
+          obj[h] = parseFloat(v) || 0;
+        }
+      });
+      if (obj.date && obj.total_orders > 0) RAW.push(obj);
+    }
+    
+    console.log('Loaded', RAW.length, 'rows from Google Sheets');
+    return RAW.length > 0;
+  } catch (err) {
+    console.error('Failed to load from Google Sheets:', err);
+    document.getElementById('heroSub').textContent = 'Error: Check that your Google Sheet sharing is set to "Anyone with the link" > Viewer';
+    return false;
+  }
+}
+
+// Wrap init in async
+async function startApp() {
+  const loaded = await loadFromSheets();
+  if (loaded && RAW.length > 0) {
+    initDashboard();
+  }
+};
+
+let DATA=[],TODAY={},DAYS=0;
+const BRANDS=[{key:'hibachi',label:'Hibachi Uber',color:'#60a5fa'},{key:'kiosk',label:'Kiosk All Brands',color:'#3b82f6'},{key:'smacked',label:'Smacked Uber',color:'#93c5fd'},{key:'meating',label:'Meating Uber',color:'#2563eb'},{key:'senor',label:'Señor Burritos',color:'#bfdbfe'},{key:'dd',label:'DD Meating',color:'#1d4ed8'},{key:'breggfast',label:'brEggfast Uber',color:'#7dd3fc'},{key:'chicks',label:'Meating Chicks',color:'#38bdf8'}];
+const $=id=>document.getElementById(id);
+const fmt$=v=>'$'+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
+const fmtD=v=>(v>=0?'$':'\u2212$')+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
+const dayName=d=>new Date(d+'T00:00:00').toLocaleDateString('en-US',{weekday:'short'});
+const shortDate=d=>new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+Chart.defaults.color='#536380';Chart.defaults.borderColor='rgba(148,163,184,0.08)';Chart.defaults.font.family='JetBrains Mono, monospace';Chart.defaults.font.size=10;
+
+function checkName(){const n=getCookie('vb_name');if(n){$('nameOverlay').classList.add('hidden');$('userName').textContent=n}else{$('nameInput').focus()}}
+function saveName(){const n=$('nameInput').value.trim();if(!n)return;setCookie('vb_name',n,365);$('nameOverlay').classList.add('hidden');$('userName').textContent=n}
+$('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter')saveName()});
+function setCookie(k,v,d){const e=new Date();e.setTime(e.getTime()+(d*864e5));document.cookie=k+'='+encodeURIComponent(v)+';expires='+e.toUTCString()+';path=/;SameSite=Lax'}
+function getCookie(k){const m=document.cookie.match('(^|;)\\s*'+k+'=([^;]*)');return m?decodeURIComponent(m[2]):''}
+
+function showPage(name,btn){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(t=>t.classList.remove('active'));$('page-'+name).classList.add('active');if(btn)btn.classList.add('active');document.querySelector('.main').scrollTop=0}
+
+function buildDayCompare(){const todayDow=new Date(TODAY.date+'T00:00:00').getDay();const prev=DATA.find((d,i)=>{if(i===0)return false;return new Date(d.date+'T00:00:00').getDay()===todayDow});if(!prev)return;const dn=new Date(TODAY.date+'T00:00:00').toLocaleDateString('en-US',{weekday:'long'});$('compareDayName').textContent=dn;$('compareDates').textContent=shortDate(TODAY.date)+' vs '+shortDate(prev.date);
+const tExp=Math.abs(TODAY.cog||0)+Math.abs(TODAY.labor||0)+Math.abs(TODAY.rent||0);const pExp=Math.abs(prev.cog||0)+Math.abs(prev.labor||0)+Math.abs(prev.rent||0);const metrics=[{label:'Orders',today:TODAY.total_orders,prev:prev.total_orders,fmt:v=>Math.round(v)},{label:'Sales',today:TODAY.total_sales,prev:prev.total_sales,fmt:v=>fmt$(v)},{label:'Payouts',today:TODAY.total_payouts,prev:prev.total_payouts,fmt:v=>fmt$(v)},{label:'Mkt+Fees',today:-Math.abs(TODAY.total_mkt_fees),prev:-Math.abs(prev.total_mkt_fees),fmt:v=>fmtD(v)},{label:'Expenses',today:-tExp,prev:-pExp,fmt:v=>fmtD(v)},{label:'EBITDA',today:TODAY.ebitda_daily,prev:prev.ebitda_daily,fmt:v=>fmtD(v)}];
+let html='';metrics.forEach(m=>{const diff=m.prev!==0?((m.today-m.prev)/Math.abs(m.prev)*100):0;const cls=diff>=0?'up':'down';const arrow=diff>=0?'\u25B2':'\u25BC';html+='<div class="compare-row"><span class="compare-label">'+m.label+'</span><div class="compare-vals"><span class="compare-today">'+m.fmt(m.today)+'</span><span class="compare-prev">'+m.fmt(m.prev)+'</span><span class="compare-delta '+cls+'">'+arrow+' '+Math.abs(diff).toFixed(0)+'%</span></div></div>'});$('compareRows').innerHTML=html}
+
+function init(){checkName();const h=new Date().getHours();$('timeOfDay').textContent=h<12?'morning':h<17?'afternoon':'evening';$('navDate').textContent=shortDate(TODAY.date);$('heroSub').textContent=new Date(TODAY.date+'T00:00:00').toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'})+' \u00B7 '+DAYS+' days';
+$('heroOrders').textContent=TODAY.total_orders;$('heroSales').textContent=fmt$(TODAY.total_sales);$('heroEbitdaDay').textContent=fmtD(TODAY.ebitda_daily);$('heroEbitdaMtd').textContent=fmtD(TODAY.ebitda_mtd);
+$('k1').textContent=fmt$(TODAY.total_sales);$('k2').textContent=TODAY.total_orders;$('k3').textContent=fmt$(TODAY.total_payouts);$('k4').textContent=fmtD(TODAY.ebitda_mtd);$('k4sub').textContent=TODAY.ebitda_mtd>=0?'Month \u25B2':'Month \u25BC';$('k5').textContent=fmtD(TODAY.total_mkt_fees);$('k6').textContent=fmtD(TODAY.ebitda_ytd);$('k6').className='kpi-val '+(TODAY.ebitda_ytd>=0?'':'neg');
+buildDayCompare();buildOverviewCharts();buildBrandTableDay();buildRatings();buildBrandsPage();buildHistoryPage();buildFinancialsPage()}
+
+function buildOverviewCharts(){const l30=DATA.slice(0,30).reverse();const labels=l30.map(d=>shortDate(d.date));
+new Chart($('chartSalesEbitda'),{type:'line',data:{labels,datasets:[{label:'Sales',data:l30.map(d=>d.total_sales),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.06)',fill:true,tension:0.4,pointRadius:2,borderWidth:2},{label:'Payouts',data:l30.map(d=>d.total_payouts),borderColor:'#93c5fd',backgroundColor:'rgba(147,197,253,0.04)',fill:true,tension:0.4,pointRadius:1.5,borderWidth:1.5,borderDash:[4,3]},{label:'EBITDA',data:l30.map(d=>d.ebitda_daily),borderColor:'#60a5fa',backgroundColor:'transparent',tension:0.4,pointRadius:2,borderWidth:2}]},options:{plugins:{legend:{labels:{boxWidth:8,padding:10,font:{size:9}}},tooltip:{backgroundColor:'#172033',borderColor:'rgba(148,163,184,0.14)',borderWidth:1}},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:8}},y:{grid:{color:'rgba(148,163,184,0.06)'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}}}}});
+const bd=BRANDS.map(b=>TODAY[b.key+'_orders']||0);const tot=bd.reduce((s,v)=>s+v,0);
+new Chart($('chartBrandDonut'),{type:'doughnut',data:{labels:BRANDS.map(b=>b.label),datasets:[{data:bd,backgroundColor:BRANDS.map(b=>b.color),borderColor:'#111b2e',borderWidth:2,hoverOffset:4}]},options:{cutout:'62%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#172033',callbacks:{label:ctx=>ctx.label+': '+ctx.parsed+' ('+(ctx.parsed/tot*100).toFixed(0)+'%)'}}}}});
+const leg=$('donutLegend');BRANDS.forEach((b,i)=>{if(bd[i]>0)leg.innerHTML+='<div class="legend-item"><div class="legend-dot" style="background:'+b.color+'"></div><span class="legend-name">'+b.label+'</span><span class="legend-val">'+bd[i]+'</span><span class="legend-pct">'+(bd[i]/tot*100).toFixed(0)+'%</span></div>'})}
+
+function buildBrandTableDay(){const t=$('brandTableDay');let h='<thead><tr><th style="text-align:left">Brand</th><th>Ord</th><th>Earn</th><th>Pay</th></tr></thead><tbody>';BRANDS.forEach(b=>{const o=TODAY[b.key+'_orders']||0,e=TODAY[b.key+'_earn']||0,p=TODAY[b.key+'_payout']||0;if(o>0)h+='<tr><td style="text-align:left"><span class="brand-dot" style="background:'+b.color+'"></span><span class="brand-name">'+b.label+'</span></td><td>'+o+'</td><td style="color:var(--blue1);font-family:var(--font-mono)">'+fmt$(e)+'</td><td style="color:var(--steel);font-family:var(--font-mono)">'+fmtD(p)+'</td></tr>'});h+='</tbody>';t.innerHTML=h}
+
+function buildRatings(){const rb=$('ratingsBlock');const stH=r=>{let s='';for(let i=1;i<=5;i++)s+='<span class="star '+(i<=Math.round(r)?'on':'off')+'">\u2605</span>';return s};$('avgRatingBadge').textContent='\u2B50 '+TODAY.avg_rating.toFixed(1);let h='';[{key:'rating_hibachi',label:'Hibachi'},{key:'rating_smacked',label:'Smacked'},{key:'rating_breggfast',label:'brEggfast'},{key:'rating_senor',label:'Se\u00F1or B.'},{key:'rating_meating',label:'Meating'},{key:'rating_chicks',label:'Chicks'}].forEach(r=>{const v=TODAY[r.key]||0;if(v>0)h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;color:var(--text2)">'+r.label+'</span><span style="display:flex;align-items:center;gap:6px"><span class="stars">'+stH(v)+'</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--warn)">'+v.toFixed(1)+'</span></span></div>'});rb.innerHTML=h}
+
+function buildBrandsPage(){const bk=$('brandKpiRow');const tO=DATA.reduce((s,d)=>s+d.total_orders,0),tE=DATA.reduce((s,d)=>s+d.total_sales,0);const top=BRANDS.reduce((b,br)=>{const e=DATA.reduce((s,d)=>s+(d[br.key+'_earn']||0),0);return e>b.e?{l:br.label,e}:b},{l:'',e:0});
+bk.innerHTML='<div class="kpi"><div class="kpi-label">Total Orders</div><div class="kpi-val accent">'+tO.toLocaleString()+'</div><div class="kpi-sub">All brands</div></div><div class="kpi"><div class="kpi-label">Total Earn</div><div class="kpi-val">'+fmt$(tE)+'</div><div class="kpi-sub">YTD</div></div><div class="kpi"><div class="kpi-label">Top Brand</div><div class="kpi-val" style="font-size:13px;color:var(--ice)">'+top.l+'</div><div class="kpi-sub">'+fmt$(top.e)+'</div></div><div class="kpi"><div class="kpi-label">Active</div><div class="kpi-val accent">'+BRANDS.length+'</div><div class="kpi-sub">Brands</div></div>';
+const eD=BRANDS.map(b=>({l:b.label,c:b.color,v:DATA.reduce((s,d)=>s+(d[b.key+'_earn']||0),0)})).sort((a,b)=>b.v-a.v);
+new Chart($('chartBrandEarnings'),{type:'bar',data:{labels:eD.map(e=>e.l.split(' ')[0]),datasets:[{data:eD.map(e=>e.v),backgroundColor:eD.map(e=>e.c),borderRadius:5,borderSkipped:false}]},options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{backgroundColor:'#172033',callbacks:{label:ctx=>' '+fmt$(ctx.parsed.x)}}},scales:{x:{grid:{color:'rgba(148,163,184,0.06)'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}},y:{grid:{display:false}}}}});
+const oD=BRANDS.map(b=>({l:b.label,c:b.color,v:DATA.reduce((s,d)=>s+(d[b.key+'_orders']||0),0)})).sort((a,b)=>b.v-a.v);
+new Chart($('chartBrandOrders'),{type:'bar',data:{labels:oD.map(e=>e.l.split(' ')[0]),datasets:[{data:oD.map(e=>e.v),backgroundColor:oD.map(e=>e.c),borderRadius:5,borderSkipped:false}]},options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{backgroundColor:'#172033',callbacks:{label:ctx=>' '+ctx.parsed.x+' orders'}}},scales:{x:{grid:{color:'rgba(148,163,184,0.06)'}},y:{grid:{display:false}}}}});
+const aR=[...DATA].reverse();new Chart($('chartBrandPayout'),{type:'line',data:{labels:aR.map(d=>shortDate(d.date)),datasets:BRANDS.slice(0,4).map(b=>({label:b.label,data:aR.map(d=>d[b.key+'_payout']||0),borderColor:b.color,backgroundColor:'transparent',tension:0.4,pointRadius:1,borderWidth:1.5}))},options:{plugins:{legend:{labels:{boxWidth:8,padding:8,font:{size:9}}},tooltip:{backgroundColor:'#172033'}},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:8}},y:{grid:{color:'rgba(148,163,184,0.06)'},ticks:{callback:v=>'$'+v}}}}});
+const sc=$('brandScorecard');let sh='<thead><tr><th style="text-align:left">Brand</th><th>Ord</th><th>Earn</th><th>Pay</th></tr></thead><tbody>';BRANDS.forEach(b=>{const o=DATA.reduce((s,d)=>s+(d[b.key+'_orders']||0),0),e=DATA.reduce((s,d)=>s+(d[b.key+'_earn']||0),0),p=DATA.reduce((s,d)=>s+(d[b.key+'_payout']||0),0);sh+='<tr><td style="text-align:left"><span class="brand-dot" style="background:'+b.color+'"></span><span class="brand-name">'+b.label+'</span></td><td>'+o+'</td><td style="color:var(--blue1);font-family:var(--font-mono)">'+fmt$(e)+'</td><td style="color:var(--steel);font-family:var(--font-mono)">'+fmtD(p)+'</td></tr>'});sh+='</tbody>';sc.innerHTML=sh}
+
+let cF='all';function getFilteredData(){if(cF==='jan')return DATA.filter(d=>d.date.startsWith('2026-01'));if(cF==='feb')return DATA.filter(d=>d.date.startsWith('2026-02'));if(cF==='mar')return DATA.filter(d=>d.date.startsWith('2026-03'));if(cF==='top10')return[...DATA].sort((a,b)=>b.total_orders-a.total_orders).slice(0,10);return DATA}
+function setFilter(f,el){cF=f;document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');buildHistoryChart();buildHistoryTable()}
+function buildHistoryPage(){buildHistoryChart();buildHistoryTable()}
+function buildHistoryChart(){const fd=getFilteredData().slice().reverse();const ctx=$('chartAllOrders');if(ctx._c)ctx._c.destroy();ctx._c=new Chart(ctx,{type:'bar',data:{labels:fd.map(d=>shortDate(d.date)),datasets:[{label:'Orders',data:fd.map(d=>d.total_orders),backgroundColor:'rgba(59,130,246,0.25)',borderColor:'#3b82f6',borderWidth:1,borderRadius:3},{label:'Sales',data:fd.map(d=>d.total_sales),type:'line',borderColor:'#60a5fa',backgroundColor:'transparent',tension:0.4,pointRadius:1.5,borderWidth:2,yAxisID:'y2'}]},options:{plugins:{legend:{labels:{boxWidth:8,padding:10,font:{size:9}}},tooltip:{backgroundColor:'#172033'}},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:10}},y:{grid:{color:'rgba(148,163,184,0.06)'},position:'left'},y2:{position:'right',grid:{display:false},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}}}}})}
+function buildHistoryTable(){const fd=getFilteredData();let h='';fd.forEach(d=>{const ec=d.ebitda_daily>=0?'ebitda-positive':'ebitda-negative';const op=Math.abs(d.cog||0)+Math.abs(d.labor||0)+Math.abs(d.rent||0);h+='<tr><td style="text-align:left;font-weight:500;font-family:var(--font-mono);font-size:10px">'+shortDate(d.date)+'</td><td style="color:var(--text3);font-size:10px">'+dayName(d.date)+'</td><td style="font-weight:600">'+d.total_orders+'</td><td style="color:var(--blue1);font-family:var(--font-mono);font-size:10px">'+fmt$(d.total_sales)+'</td><td style="color:var(--warn);font-family:var(--font-mono);font-size:10px">'+fmtD(d.total_mkt_fees)+'</td><td style="color:var(--steel);font-family:var(--font-mono);font-size:10px">'+fmt$(d.total_payouts)+'</td><td style="color:var(--down);font-family:var(--font-mono);font-size:10px">'+fmtD(-op)+'</td><td class="'+ec+'" style="font-family:var(--font-mono);font-size:10px;font-weight:600">'+fmtD(d.ebitda_daily)+'</td><td class="'+(d.ebitda_mtd>=0?'ebitda-positive':'ebitda-negative')+'" style="font-family:var(--font-mono);font-size:10px">'+fmtD(d.ebitda_mtd)+'</td></tr>'});$('historyTable').innerHTML=h}
+
+function buildFinancialsPage(){const tS=DATA.reduce((s,d)=>s+d.total_sales,0),tF=DATA.reduce((s,d)=>s+Math.abs(d.total_mkt_fees),0),tP=DATA.reduce((s,d)=>s+d.total_payouts,0),tC=DATA.reduce((s,d)=>s+Math.abs(d.cog||0),0),tL=DATA.reduce((s,d)=>s+Math.abs(d.labor||0),0),tR=DATA.reduce((s,d)=>s+Math.abs(d.rent||0),0),ly=TODAY.ebitda_ytd;
+$('f1').textContent=fmt$(tS);$('f2').textContent=fmt$(tF);$('f3').textContent=fmt$(tP);$('f4').textContent=fmtD(ly);$('f4').style.color=ly>=0?'var(--up)':'var(--down)';
+const mo={};DATA.forEach(d=>{const m=d.date.substring(0,7);if(!mo[m])mo[m]={s:0,f:0,p:0,o:0,e:0};mo[m].s+=d.total_sales;mo[m].f+=Math.abs(d.total_mkt_fees);mo[m].p+=d.total_payouts;mo[m].o+=Math.abs(d.cog||0)+Math.abs(d.labor||0)+Math.abs(d.rent||0)});Object.keys(mo).forEach(m=>{const ld=DATA.filter(d=>d.date.startsWith(m)).sort((a,b)=>b.date.localeCompare(a.date))[0];mo[m].e=ld?ld.ebitda_mtd:0});
+const mk=Object.keys(mo).sort(),ml=mk.map(m=>new Date(m+'-01').toLocaleDateString('en-US',{month:'short'}));
+new Chart($('chartMonthlyPnl'),{type:'bar',data:{labels:ml,datasets:[{label:'Sales',data:mk.map(m=>mo[m].s),backgroundColor:'rgba(59,130,246,0.2)',borderColor:'#3b82f6',borderWidth:2,borderRadius:5,stack:'a'},{label:'Fees',data:mk.map(m=>-mo[m].f),backgroundColor:'rgba(251,191,36,0.15)',borderColor:'#fbbf24',borderWidth:2,borderRadius:5,stack:'a'},{label:'OpEx',data:mk.map(m=>-mo[m].o),backgroundColor:'rgba(248,113,113,0.15)',borderColor:'#f87171',borderWidth:2,borderRadius:5,stack:'a'},{label:'EBITDA',data:mk.map(m=>mo[m].e),type:'line',borderColor:'#60a5fa',backgroundColor:'transparent',tension:0.3,pointRadius:4,pointBackgroundColor:'#60a5fa',borderWidth:2}]},options:{plugins:{legend:{labels:{boxWidth:8,padding:8,font:{size:9}}},tooltip:{backgroundColor:'#172033',callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmtD(ctx.parsed.y)}}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(148,163,184,0.06)'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}}}}});
+const ci=[{l:'Mkt Offers',v:tF,c:'#60a5fa'},{l:'CoG',v:tC,c:'#3b82f6'},{l:'Labor',v:tL,c:'#93c5fd'},{l:'Rent',v:tR,c:'#bfdbfe'}];const tc=ci.reduce((s,c)=>s+c.v,0);
+new Chart($('chartCostBreakdown'),{type:'doughnut',data:{labels:ci.map(c=>c.l),datasets:[{data:ci.map(c=>c.v),backgroundColor:ci.map(c=>c.c),borderColor:'#111b2e',borderWidth:3,hoverOffset:4}]},options:{cutout:'62%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#172033',callbacks:{label:ctx=>ctx.label+': '+fmt$(ctx.parsed)+' ('+(ctx.parsed/tc*100).toFixed(1)+'%)'}}}}});
+const cL=$('costLegend');ci.forEach(c=>{cL.innerHTML+='<div class="legend-item"><div class="legend-dot" style="background:'+c.c+'"></div><span class="legend-name">'+c.l+'</span><span class="legend-val">'+fmt$(c.v)+'</span><span class="legend-pct">'+(c.v/tc*100).toFixed(1)+'%</span></div>'});
+const ar=[...DATA].reverse();new Chart($('chartEbitdaTrend'),{type:'line',data:{labels:ar.map(d=>shortDate(d.date)),datasets:[{label:'EBITDA',data:ar.map(d=>d.ebitda_daily),borderColor:'#60a5fa',backgroundColor:ctx=>{const ch=ctx.chart;const{ctx:c,chartArea}=ch;if(!chartArea)return'transparent';const g=c.createLinearGradient(0,chartArea.top,0,chartArea.bottom);g.addColorStop(0,'rgba(96,165,250,0.2)');g.addColorStop(0.5,'rgba(96,165,250,0.04)');g.addColorStop(1,'rgba(248,113,113,0.06)');return g},fill:true,tension:0.4,pointRadius:1.5,borderWidth:2}]},options:{plugins:{legend:{display:false},tooltip:{backgroundColor:'#172033',callbacks:{label:ctx=>' EBITDA: '+fmtD(ctx.parsed.y)}}},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:10}},y:{grid:{color:'rgba(148,163,184,0.06)'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}}}}});
+const ad=DATA.length;const oi=[{l:'Avg CoG/day',v:tC/ad,p:tC/tS*100,c:'#3b82f6'},{l:'Avg Labor/day',v:tL/ad,p:tL/tS*100,c:'#93c5fd'},{l:'Avg Rent/day',v:tR/ad,p:tR/tS*100,c:'#bfdbfe'},{l:'Avg Fees/day',v:tF/ad,p:tF/tS*100,c:'#60a5fa'}];const tO2=tC+tL+tR+tF;
+let oh='<div style="margin-bottom:14px">';oi.forEach(o=>{oh+='<div class="pnl-row"><div class="pnl-label">'+o.l+'</div><div class="pnl-bar-wrap"><div class="pnl-bar" style="width:'+o.p.toFixed(1)+'%;background:'+o.c+'"></div></div><div class="pnl-val" style="color:'+o.c+'">'+fmt$(o.v)+'</div></div>'});oh+='</div>';
+oh+='<div class="mini-stat"><span class="mini-stat-label">Total OpEx YTD</span><span class="mini-stat-val" style="color:var(--down)">'+fmt$(tO2)+'</span></div>';
+oh+='<div class="mini-stat"><span class="mini-stat-label">OpEx % of Sales</span><span class="mini-stat-val">'+(tO2/tS*100).toFixed(1)+'%</span></div>';
+oh+='<div class="mini-stat"><span class="mini-stat-label">Avg Order Value</span><span class="mini-stat-val" style="color:var(--blue1)">'+fmt$(tS/DATA.reduce((s,d)=>s+d.total_orders,0))+'</span></div>';
+oh+='<div class="mini-stat"><span class="mini-stat-label">Best EBITDA Day</span><span class="mini-stat-val" style="color:var(--up)">'+fmt$(Math.max(...DATA.map(d=>d.ebitda_daily)))+'</span></div>';
+oh+='<div class="mini-stat"><span class="mini-stat-label">Days Tracked</span><span class="mini-stat-val">'+DAYS+'</span></div>';
+$('opexBlock').innerHTML=oh}
+
+function initDashboard(){
+DATA=[...RAW].sort((a,b)=>b.date.localeCompare(a.date));TODAY=DATA[0];DAYS=DATA.length;
+init();}
+startApp();
+// Auto-refresh data every 5 minutes
+setInterval(async () => {
+  const loaded = await loadFromSheets();
+  if (loaded && RAW.length > 0) {
+    document.querySelectorAll('canvas').forEach(cv => {
+      const ch = Chart.getChart(cv);
+      if(ch) ch.destroy();
+    });
+    initDashboard();
+  }
+}, 300000);
+
+</script>
+</body>
+</html>
